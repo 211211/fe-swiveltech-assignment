@@ -154,6 +154,7 @@ const EmployeeCreate: NextPage = ({ data }: any) => {
     if (response.status === 201) {
       // back to list page
       router.push("/employee/list");
+      return
     }
   };
 

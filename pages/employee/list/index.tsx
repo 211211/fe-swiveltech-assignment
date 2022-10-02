@@ -184,12 +184,12 @@ export const GENDER_OPTIONS: Record<string, string> = {
 
 const Button = styled.button`
   width: inherit;
-`
+`;
 
 const EmployeeList: NextPage = ({ data }: any) => {
   const [view, setView] = useState(GRID_VIEW);
   const [list, setList] = useState(data?.data?.employee ?? []);
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const onViewClicked = (_view: string) => {
     setView(_view);
   };
@@ -199,20 +199,23 @@ const EmployeeList: NextPage = ({ data }: any) => {
       return;
     }
 
-    // make call: delete
-    await deleteEmployer(id);
-    const data = await fetchEmployee()
-    console.log({ data })
-    setList(data.data.employee)
+    try {
+      setLoading(true);
+      await deleteEmployer(id);
+      const response = await fetchEmployee();
+      setList(response.data.employee);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Container>
       <Header>Employee Manager</Header>
       <MenuContainer>
-        <Link href='/employee/add'>
-          Add Employee
-        </Link>
+        <Link href="/employee/add">Add Employee</Link>
         {view === GRID_VIEW && (
           <ViewButton onClick={() => onViewClicked(TABLE_VIEW)}>
             Table
@@ -226,7 +229,7 @@ const EmployeeList: NextPage = ({ data }: any) => {
       {view === GRID_VIEW && (
         <CardContainer>
           {(list ?? []).map((employee: any) => (
-            <CardItem key={employee.email}>
+            <CardItem key={employee._id}>
               <CardItemEmployeeImage>
                 <NextImage
                   src={employee?.photo}
@@ -239,13 +242,20 @@ const EmployeeList: NextPage = ({ data }: any) => {
                 <CardItemEmployeeInfoLeft>
                   <span>
                     {employee.firstName} {employee.lastName}
-                  </span><br />
-                  <span>{employee.email}</span><br />
-                  <span>{employee.phoneNumber}</span><br />
-                  <span>{GENDER_OPTIONS[employee.gender]}</span><br />
+                  </span>
+                  <br />
+                  <span>{employee.email}</span>
+                  <br />
+                  <span>{employee.phoneNumber}</span>
+                  <br />
+                  <span>{GENDER_OPTIONS[employee.gender]}</span>
+                  <br />
                 </CardItemEmployeeInfoLeft>
                 <CardItemEmployeeInfoRight>
-                  <Button onClick={() => onClickedDelete(employee._id)}>
+                  <Button
+                    disabled={loading}
+                    onClick={() => onClickedDelete(employee._id)}
+                  >
                     Delete
                   </Button>
                   &nbsp;&nbsp;
@@ -271,7 +281,7 @@ const EmployeeList: NextPage = ({ data }: any) => {
             <th>Actions</th>
           </tr>
           {(list ?? []).map((employee: any) => (
-            <tr key={`${employee.firstName} ${employee.lastName}`}>
+            <tr key={`${employee._id}`}>
               <td>
                 <NextImage
                   src={employee?.photo}
@@ -286,12 +296,13 @@ const EmployeeList: NextPage = ({ data }: any) => {
               <td>{employee.phoneNumber}</td>
               <td>{GENDER_OPTIONS[employee.gender]}</td>
               <td>
-                <Button onClick={() => onClickedDelete(employee._id)}>
+                <Button
+                  disabled={loading}
+                  onClick={() => onClickedDelete(employee._id)}
+                >
                   delete
                 </Button>
-                <Link href={`/employee/edit/${employee._id}`}>
-                  Edit
-                </Link>
+                <Link href={`/employee/edit/${employee._id}`}>Edit</Link>
               </td>
             </tr>
           ))}

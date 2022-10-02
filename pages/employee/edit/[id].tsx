@@ -27,8 +27,6 @@ const updateEmployerById = async (
     gender?: GENDER_ENUM_OPTIONS.M | GENDER_ENUM_OPTIONS.F;
   }
 ) => {
-  console.log({ id });
-  console.log("NEXT_API_URL: ", NEXT_API_URL);
   if (!id) {
     return;
   }
@@ -230,7 +228,11 @@ const EmployeeEdit: NextPage = ({ data }: any) => {
       gender: data.gender,
     });
 
-    console.log({ response });
+    if (response.status === 200) {
+      // back to list page
+      router.push("/employee/list");
+      return
+    }
   };
 
   return (
