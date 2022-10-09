@@ -213,21 +213,29 @@ const EmployeeList: NextPage = ({ data }: any) => {
 
   return (
     <Container>
-      <Header>Employee Manager</Header>
-      <MenuContainer>
+      <Header data-testid="employee-header">Employee Manager</Header>
+      <MenuContainer data-testid="employee-menu">
         <Link href="/employee/add">Add Employee</Link>
         {view === GRID_VIEW && (
-          <ViewButton onClick={() => onViewClicked(TABLE_VIEW)}>
+          <ViewButton
+            data-testid="employee-table-button"
+            onClick={() => onViewClicked(TABLE_VIEW)}
+          >
             Table
           </ViewButton>
         )}
 
         {view === TABLE_VIEW && (
-          <ViewButton onClick={() => onViewClicked(GRID_VIEW)}>Grid</ViewButton>
+          <ViewButton
+            data-testid="employee-grid-button"
+            onClick={() => onViewClicked(GRID_VIEW)}
+          >
+            Grid
+          </ViewButton>
         )}
       </MenuContainer>
       {view === GRID_VIEW && (
-        <CardContainer>
+        <CardContainer data-testid="employee-card">
           {(list ?? []).map((employee: any) => (
             <CardItem key={employee._id}>
               <CardItemEmployeeImage>
@@ -270,57 +278,50 @@ const EmployeeList: NextPage = ({ data }: any) => {
       )}
 
       {view === TABLE_VIEW && (
-        <table>
-          <tr>
-            <th>Image</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Gender</th>
-            <th>Actions</th>
-          </tr>
-          {(list ?? []).map((employee: any) => (
-            <tr key={`${employee._id}`}>
-              <td>
-                <NextImage
-                  src={employee?.photo}
-                  alt={`${employee.firstName} ${employee.lastName}`}
-                  width={"50px"}
-                  height={"50px"}
-                />
-              </td>
-              <td>{employee.firstName}</td>
-              <td>{employee.lastName}</td>
-              <td>{employee.email}</td>
-              <td>{employee.phoneNumber}</td>
-              <td>{GENDER_OPTIONS[employee.gender]}</td>
-              <td>
-                <Button
-                  disabled={loading}
-                  onClick={() => onClickedDelete(employee._id)}
-                >
-                  Delete
-                </Button>
-                &nbsp;
-                <Link href={`/employee/edit/${employee._id}`}>Edit</Link>
-              </td>
+        <table data-testid="employee-table">
+          <tbody>
+            <tr>
+              <th>Image</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Gender</th>
+              <th>Actions</th>
             </tr>
-          ))}
+
+            {(list ?? []).map((employee: any) => (
+              <tr key={`${employee._id}`}>
+                <td>
+                  <NextImage
+                    src={employee?.photo}
+                    alt={`${employee.firstName} ${employee.lastName}`}
+                    width={"50px"}
+                    height={"50px"}
+                  />
+                </td>
+                <td>{employee.firstName}</td>
+                <td>{employee.lastName}</td>
+                <td>{employee.email}</td>
+                <td>{employee.phoneNumber}</td>
+                <td>{GENDER_OPTIONS[employee.gender]}</td>
+                <td>
+                  <Button
+                    disabled={loading}
+                    onClick={() => onClickedDelete(employee._id)}
+                  >
+                    Delete
+                  </Button>
+                  &nbsp;
+                  <Link href={`/employee/edit/${employee._id}`}>Edit</Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       )}
     </Container>
   );
 };
-
-export interface CardItemProps {
-  firstName: string;
-  lastName: string;
-  email: string;
-  number: string;
-  gender: string;
-  id: string;
-  photo?: string;
-}
 
 export default EmployeeList;
