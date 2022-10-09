@@ -187,8 +187,8 @@ const Button = styled.button`
 `;
 
 const EmployeeList: NextPage = ({ data }: any) => {
-  const [view, setView] = useState(GRID_VIEW);
   const [list, setList] = useState(data?.data?.employee ?? []);
+  const [view, setView] = useState(GRID_VIEW);
   const [loading, setLoading] = useState(false);
   const onViewClicked = (_view: string) => {
     setView(_view);
@@ -237,7 +237,7 @@ const EmployeeList: NextPage = ({ data }: any) => {
       {view === GRID_VIEW && (
         <CardContainer data-testid="employee-card">
           {(list ?? []).map((employee: any) => (
-            <CardItem key={employee._id}>
+            <CardItem key={employee._id} data-testid='employee-item'>
               <CardItemEmployeeImage>
                 <NextImage
                   src={employee?.photo}
