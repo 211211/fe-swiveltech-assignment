@@ -300,8 +300,9 @@ const EmployeeList: NextPage = ({ data }: any) => {
                   disabled={loading}
                   onClick={() => onClickedDelete(employee._id)}
                 >
-                  delete
+                  Delete
                 </Button>
+                &nbsp;
                 <Link href={`/employee/edit/${employee._id}`}>Edit</Link>
               </td>
             </tr>

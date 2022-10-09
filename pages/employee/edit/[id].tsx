@@ -1,21 +1,23 @@
-import { SubmitHandler, UseFormReturn, useForm } from "react-hook-form";
-import { forwardRef, useEffect, useId, useState } from "react";
+import * as yup from "yup";
 
-import Head from "next/head";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { forwardRef, useState } from "react";
+
+import { ErrorMessage } from "@hookform/error-message";
 import { HeadersInit } from "node-fetch";
-import NextImage from "next/image";
 import NextLink from "next/link";
 import type { NextPage } from "next";
 import React from "react";
 import { fetchEmployee } from "../list";
 import styled from "styled-components";
 import { useRouter } from "next/router";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 const NEXT_API_URL = process.env.NEXT_API_URL;
 
 export enum GENDER_ENUM_OPTIONS {
-  M,
-  F,
+  M = "0",
+  F = "1",
 }
 const updateEmployerById = async (
   id: string,
@@ -140,11 +142,6 @@ export const getStaticPaths = async () => {
   };
 };
 
-export const GENDER_OPTIONS: Record<string, string> = {
-  0: "Male",
-  1: "Female",
-};
-
 export const MenuContainer = styled.div`
   padding: 24px 48px 24px 48px;
   display: flex;
@@ -201,6 +198,20 @@ export const Link = ({ href, children, styles = {} }: any) => {
   );
 };
 
+const EmployeeEditSchema = yup.object().shape({
+  firstName: yup.string().required().min(6).max(10),
+  lastName: yup.string().required().min(6).max(10),
+  email: yup.string().required().max(255),
+  phoneNumber: yup.string().required(),
+  gender: yup
+    .mixed()
+    .required()
+    .oneOf(
+      [GENDER_ENUM_OPTIONS.M, GENDER_ENUM_OPTIONS.F],
+      "Your gender must be Male or Female"
+    ),
+});
+
 const EmployeeEdit: NextPage = ({ data }: any) => {
   const router = useRouter();
   const { id } = router.query;
@@ -210,15 +221,18 @@ const EmployeeEdit: NextPage = ({ data }: any) => {
     handleSubmit,
     watch,
     formState: { errors },
+
   } = useForm<any>({
     defaultValues: {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
       phoneNumber: formData.phoneNumber,
-      gender: formData.gender,
+      gender: formData.gender.toString(),
     },
+    resolver: yupResolver(EmployeeEditSchema),
   });
+
   const onSubmit: SubmitHandler<any> = async (data) => {
     const response = await updateEmployerById(id as string, {
       firstName: data.firstName,
@@ -250,18 +264,40 @@ const EmployeeEdit: NextPage = ({ data }: any) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <label htmlFor="firstName">First Name</label>
         <Input placeholder="Your first name" {...register("firstName")} />
+        <ErrorMessage
+          errors={errors}
+          name="firstName"
+          render={({ message }) => <p>{message}</p>}
+        />
         <label htmlFor="lastName">Last Name</label>
         <Input placeholder="Your last name" {...register("lastName")} />
+        <ErrorMessage
+          errors={errors}
+          name="lastName"
+          render={({ message }) => <p>{message}</p>}
+        />
         <label htmlFor="email">Email</label>
         <Input
           placeholder="example@email.com"
           type="email"
           {...register("email")}
         />
-        <label htmlFor="phoneNumber">Phone Number</label>
+        <ErrorMessage
+          errors={errors}
+          name="email"
+          render={({ message }) => <p>{message}</p>}
+        />
+        <label htmlFor="phoneNumber">
+          Phone Number. For example: +94 xx zzzzzzz
+        </label>
         <Input
-          placeholder="Must be start from +94"
+          placeholder="Must be start from +94 (Sri Lanka). I.e: +94 xx zzzzzzz"
           {...register("phoneNumber")}
+        />
+        <ErrorMessage
+          errors={errors}
+          name="phoneNumber"
+          render={({ message }) => <p>{message}</p>}
         />
         <label htmlFor="gender">Gender</label>
         <Select
@@ -270,6 +306,11 @@ const EmployeeEdit: NextPage = ({ data }: any) => {
             { label: "Female", value: GENDER_ENUM_OPTIONS.F },
             { label: "Male", value: GENDER_ENUM_OPTIONS.M },
           ]}
+        />
+        <ErrorMessage
+          errors={errors}
+          name="gender"
+          render={({ message }) => <p>{message}</p>}
         />
 
         <button type="submit">Save</button>
