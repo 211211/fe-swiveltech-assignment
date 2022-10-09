@@ -8,54 +8,15 @@ import { HeadersInit } from "node-fetch";
 import NextLink from "next/link";
 import type { NextPage } from "next";
 import React from "react";
+import { createEmployer } from "../../../apis";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import { yupResolver } from "@hookform/resolvers/yup";
-
-const NEXT_API_URL = process.env.NEXT_API_URL;
 
 export enum GENDER_ENUM_OPTIONS {
   M = "0",
   F = "1",
 }
-const createEmployer = async (createInfo: {
-  lastName?: string;
-  firstName?: string;
-  email?: string;
-  phoneNumber?: string;
-  gender?: GENDER_ENUM_OPTIONS.M | GENDER_ENUM_OPTIONS.F;
-  photo?: string;
-}) => {
-  if (!NEXT_API_URL) {
-    throw new Error(`NEXT_API_URL is ${NEXT_API_URL}`);
-  }
-
-  const myHeaders = new Headers();
-  myHeaders.append("Content-Type", "application/json");
-
-  // as requirement, photo property is not mandatory
-  delete createInfo.photo;
-
-  const raw = JSON.stringify({
-    firstName: createInfo.firstName,
-    lastName: createInfo.lastName,
-    email: createInfo.email,
-    phoneNumber: createInfo.phoneNumber,
-    gender: createInfo.gender,
-    // photo: createInfo?.photo,
-  });
-
-  const requestOptions: HeadersInit = {
-    method: "POST",
-    headers: myHeaders as any,
-    body: raw,
-    redirect: "follow",
-  };
-
-  const response = await fetch(`${NEXT_API_URL}/employee`, requestOptions);
-
-  return await response.json();
-};
 
 export const MenuContainer = styled.div`
   padding: 24px 48px 24px 48px;
@@ -127,9 +88,9 @@ const EmployeeCreateSchema = yup.object().shape({
     ),
 });
 
-const EmployeeCreate: NextPage = ({ data }: any) => {
+const EmployeeCreate: NextPage = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState({
+  const [formData] = useState({
     firstName: "",
     lastName: "",
     email: "",
@@ -154,7 +115,6 @@ const EmployeeCreate: NextPage = ({ data }: any) => {
     resolver: yupResolver(EmployeeCreateSchema),
   });
 
-
   const onSubmit: SubmitHandler<any> = async (data) => {
     const response = await createEmployer({
       firstName: data.firstName,
@@ -174,7 +134,7 @@ const EmployeeCreate: NextPage = ({ data }: any) => {
 
   return (
     <Container>
-      <MenuContainer>
+      <MenuContainer data-testid="back-to-list">
         <Link
           href={`/employee/list`}
           styles={{
@@ -184,31 +144,44 @@ const EmployeeCreate: NextPage = ({ data }: any) => {
           Back to list view
         </Link>
       </MenuContainer>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} data-testid="add-employee">
         <label htmlFor="firstName">First Name</label>
-        <Input placeholder="Your first name" {...register("firstName")} />
+        <Input
+          placeholder="Your first name"
+          {...register("firstName")}
+          data-testid="input-firstName"
+        />
         <ErrorMessage
           errors={errors}
           name="firstName"
-          render={({ message }) => <p>{message}</p>}
+          render={({ message }) => (
+            <p data-testid="error-firstName">{message}</p>
+          )}
         />
         <label htmlFor="lastName">Last Name</label>
-        <Input placeholder="Your last name" {...register("lastName")} />
+        <Input
+          placeholder="Your last name"
+          {...register("lastName")}
+          data-testid="input-lastName"
+        />
         <ErrorMessage
           errors={errors}
           name="lastName"
-          render={({ message }) => <p>{message}</p>}
+          render={({ message }) => (
+            <p data-testid="error-lastName">{message}</p>
+          )}
         />
         <label htmlFor="email">Email</label>
         <Input
           placeholder="example@email.com"
           type="email"
           {...register("email")}
+          data-testid="input-email"
         />
         <ErrorMessage
           errors={errors}
           name="email"
-          render={({ message }) => <p>{message}</p>}
+          render={({ message }) => <p data-testid="error-email">{message}</p>}
         />
         <label htmlFor="phoneNumber">
           Phone Number. For example: +94 xx zzzzzzz
@@ -216,11 +189,14 @@ const EmployeeCreate: NextPage = ({ data }: any) => {
         <Input
           placeholder="Must be start from +94 (Sri Lanka). I.e: +94 xx zzzzzzz"
           {...register("phoneNumber")}
+          data-testid="input-phoneNumber"
         />
         <ErrorMessage
           errors={errors}
           name="phoneNumber"
-          render={({ message }) => <p>{message}</p>}
+          render={({ message }) => (
+            <p data-testid="error-phoneNumber">{message}</p>
+          )}
         />
         <label htmlFor="gender">Gender</label>
         <Select
@@ -229,11 +205,12 @@ const EmployeeCreate: NextPage = ({ data }: any) => {
             { label: "Female", value: GENDER_ENUM_OPTIONS.F },
             { label: "Male", value: GENDER_ENUM_OPTIONS.M },
           ]}
+          data-testid="select-gender"
         />
         <ErrorMessage
           errors={errors}
           name="gender"
-          render={({ message }) => <p>{message}</p>}
+          render={({ message }) => <p data-testid="error-gender">{message}</p>}
         />
 
         <button type="submit">Add</button>
